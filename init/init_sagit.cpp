@@ -31,13 +31,16 @@
 #include <string.h>
 #include <sys/sysinfo.h>
 
-#include "vendor_init.h"
-#include "property_service.h"
-#include "log.h"
-#include "util.h"
+#include <android-base/properties.h>
 
-char const *heapminfree;
-char const *heapmaxfree;
+#include "property_service.h"
+#include "vendor_init.h"
+
+using android::base::GetProperty;
+using android::base::SetProperty;
+
+std::string heapminfree;
+std::string heapmaxfree;
 
 static void init_finger_print_properties()
 {
@@ -93,11 +96,7 @@ static void init_alarm_boot_properties()
      * 7 -> CBLPWR_N pin toggled (for external power supply)
      * 8 -> KPDPWR_N pin toggled (power key pressed)
      */
-     if (boot_reason == 3) {
-        property_set("ro.alarm_boot", "true");
-     } else {
-        property_set("ro.alarm_boot", "false");
-     }
+    SetProperty("ro.alarm_boot", boot_reason == 3 ? "true" : "false");
 }
 
 void check_device()
@@ -121,18 +120,18 @@ void vendor_load_properties()
 {
     std::string platform;
 
-    platform = property_get("ro.board.platform");
+    platform = GetProperty("ro.board.platform", "");
     if (platform != ANDROID_TARGET)
         return;
 
     check_device();
 
-    property_set("dalvik.vm.heapstartsize", "8m");
-    property_set("dalvik.vm.heapgrowthlimit", "256m");
-    property_set("dalvik.vm.heapsize", "512m");
-    property_set("dalvik.vm.heaptargetutilization", "0.75");
-    property_set("dalvik.vm.heapminfree", heapminfree);
-    property_set("dalvik.vm.heapmaxfree", heapmaxfree);
+    SetProperty("dalvik.vm.heapstartsize", "8m");
+    SetProperty("dalvik.vm.heapgrowthlimit", "256m");
+    SetProperty("dalvik.vm.heapsize", "512m");
+    SetProperty("dalvik.vm.heaptargetutilization", "0.75");
+    SetProperty("dalvik.vm.heapminfree", heapminfree);
+    SetProperty("dalvik.vm.heapmaxfree", heapmaxfree);
 
     init_alarm_boot_properties();
     init_finger_print_properties();
