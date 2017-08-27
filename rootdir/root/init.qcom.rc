@@ -356,9 +356,6 @@ on post-fs-data
     mkdir /data/fota 0771
     chown system system /data/fota
 
-    #Create directory for hostapd
-    mkdir /data/hostapd 0770 system wifi
-
     # Create /data/time folder for time-services
     mkdir /data/time/ 0700 system system
 
@@ -996,13 +993,6 @@ service atfwd /system/bin/ATFWD-daemon
     class late_start
     user system
     group system radio
-
-service hostapd /system/bin/hostapd -dd /data/hostapd/hostapd.conf
-    class late_start
-    user root
-    group root
-    oneshot
-    disabled
 
 service ds_fmc_appd /system/bin/ds_fmc_appd -p "rmnet0" -D
     class late_start
