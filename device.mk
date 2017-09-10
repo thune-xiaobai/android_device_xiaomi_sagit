@@ -75,7 +75,10 @@ PRODUCT_CHARACTERISTICS := nosdcard
 
 # Audio
 PRODUCT_PACKAGES += \
-    audiod \
+    android.hardware.audio@2.0-impl \
+    android.hardware.audio@2.0-service \
+    android.hardware.audio.effect@2.0-impl \
+    android.hardware.soundtrigger@2.0-impl \
     audio.a2dp.default \
     audio.primary.msm8998 \
     audio.r_submix.default \
@@ -114,15 +117,29 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     external/ant-wireless/antradio-library/com.dsi.ant.antradio_library.xml:system/etc/permissions/com.dsi.ant.antradio_library.xml
 
+# Bluetooth HAL
+PRODUCT_PACKAGES += \
+    android.hardware.bluetooth@1.0-impl \
+    android.hardware.bluetooth@1.0-service
+
 # Camera
 PRODUCT_PACKAGES += \
-    Snap
+    Snap \
+    android.hardware.camera.provider@2.4-impl \
+    android.hardware.camera.provider@2.4-service \
+    camera.device@3.2-impl \
+    vendor.qti.hardware.camera.device@1.0 \
+    vendor.qti.hardware.camera.device@1.0_vendor
 
 # Connectivity Engine support (CNE)
 PRODUCT_PACKAGES += \
     cneapiclient \
     com.quicinc.cne \
     services-ext
+
+# Consumerir
+PRODUCT_PACKAGES += \
+    android.hardware.ir@1.0-impl
 
 # Display
 PRODUCT_PACKAGES += \
@@ -131,19 +148,40 @@ PRODUCT_PACKAGES += \
     hwcomposer.msm8998 \
     memtrack.msm8998 \
     liboverlay \
-    libtinyxml
+    libtinyxml \
+    android.hardware.graphics.allocator@2.0-impl \
+    android.hardware.graphics.allocator@2.0-service \
+    android.hardware.graphics.mapper@2.0-impl \
+    android.hardware.memtrack@1.0-impl \
+    android.hardware.graphics.composer@2.1-impl \
+    vendor.display.config@1.0 \
+    vendor.display.config@1.0_vendor
 
 # Doze
 PRODUCT_PACKAGES += \
     XiaomiDoze
 
+# DRM
+PRODUCT_PACKAGES += \
+    android.hardware.drm@1.0-impl \
+    android.hardware.drm@1.0-service
+
 # Fingerprint sensor
 PRODUCT_PACKAGES += \
-    fingerprintd
+    android.hardware.biometrics.fingerprint@2.1-service
 
 # For android_filesystem_config.h
 PRODUCT_PACKAGES += \
     fs_config_files
+
+# Gatekeeper HAL
+PRODUCT_PACKAGES += \
+    android.hardware.gatekeeper@1.0-impl \
+    android.hardware.gatekeeper@1.0-service
+
+#GNSS HAL
+PRODUCT_PACKAGES += \
+    android.hardware.gnss@1.0-impl
 
 # GPS
 PRODUCT_PACKAGES += \
@@ -183,9 +221,15 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/sec_config:system/etc/sec_config
 
+# Keymaster HAL
+PRODUCT_PACKAGES += \
+    android.hardware.keymaster@3.0-impl \
+    android.hardware.keymaster@3.0-service
 
 # Lights
 PRODUCT_PACKAGES += \
+    android.hardware.light@2.0-impl \
+    android.hardware.light@2.0-service \
     lights.msm8998
 
 # LiveDisplay jni
@@ -205,6 +249,8 @@ PRODUCT_COPY_FILES += \
 
 # NFC
 PRODUCT_PACKAGES += \
+    android.hardware.nfc@1.0-impl \
+    android.hardware.nfc@1.0-service \
     com.android.nfc_extras \
     com.nxp.nfc.nq \
     nfc_nci.nqx.default \
@@ -232,7 +278,7 @@ PRODUCT_PACKAGES += \
 
 # Power
 PRODUCT_PACKAGES += \
-    power.msm8998
+    android.hardware.power@1.1-service-qti
 
 # QMI
 PRODUCT_PACKAGES += \
@@ -269,8 +315,13 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/fbe_check.sh:install/bin/fbe_check.sh
 
+# RenderScript HAL
+PRODUCT_PACKAGES += \
+    android.hardware.renderscript@1.0-impl
+
 # RIL
 PRODUCT_PACKAGES += \
+    android.hardware.broadcastradio@1.0-impl \
     librmnetctl \
     libxml2 \
     libprotobuf-cpp-full
@@ -281,10 +332,26 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Sensors
 PRODUCT_PACKAGES += \
-    sensors.msm8998
+    android.hardware.sensors@1.0-impl \
+    android.hardware.sensors@1.0-service
+
+# Thermal HAL
+PRODUCT_PACKAGES += \
+    android.hardware.thermal@1.0-impl \
+    android.hardware.thermal@1.0-service
+
+#USB HAL
+PRODUCT_PACKAGES += \
+    android.hardware.usb@1.0-service
+
+# Vibrator
+PRODUCT_PACKAGES += \
+    android.hardware.vibrator@1.0-impl \
+    android.hardware.vibrator@1.0-service
 
 # Wifi
 PRODUCT_PACKAGES += \
+    android.hardware.wifi@1.0-service \
     ipacm \
     ipacm-diag \
     IPACM_cfg.xml \
