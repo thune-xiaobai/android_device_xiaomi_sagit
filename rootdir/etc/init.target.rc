@@ -510,12 +510,6 @@ service energy-awareness /system/bin/energy-awareness
     group system
     oneshot
 
-#fingerprint service
-service fingerprintd /system/bin/fingerprintd
-    class late_start
-    user system
-    group system sdcard_rw
-
 service displayfeature /system/bin/displayfeature
     class late_start
     user root
