@@ -209,8 +209,8 @@ BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
 USE_SENSOR_MULTI_HAL := true
 
 # Vendor init
-TARGET_INIT_VENDOR_LIB := libinit_sagit
-TARGET_RECOVERY_DEVICE_MODULES := libinit_sagit
+# TARGET_INIT_VENDOR_LIB := libinit_sagit
+# TARGET_RECOVERY_DEVICE_MODULES := libinit_sagit
 
 # Wifi
 BOARD_HAS_QCOM_WLAN := true
