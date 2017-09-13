@@ -240,7 +240,7 @@ on boot
     chown wifi wifi /sys/class/net/bond0/bonding/queue_id
 
     # Wifi firmware reload path
-    chown wifi wifi /sys/module/wlan/parameters/fwpath
+    # chown wifi wifi /sys/module/wlan/parameters/fwpath
 
     # Allow access to emmc rawdump block partition and dload sysfs node
     chown root system /dev/block/bootdevice/by-name/rawdump -p /dev/block/
@@ -492,6 +492,9 @@ on property:sys.boot_completed=1
     chown media audio /sys/kernel/wdsp0/boot
     #CPE fw_name used by sound trigger HAL
     chown media audio /sys/kernel/wcd_cpe0/fw_name
+
+    insmod /system/lib/modules/wlan.ko
+    chown wifi wifi /sys/module/wlan/parameters/fwpath
 
 on property:persist.radio.atfwd.start=false
     stop atfwd
