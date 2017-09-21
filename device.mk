@@ -221,6 +221,10 @@ PRODUCT_PACKAGES += \
     lights.msm8998 \
     android.hardware.light@2.0-impl
 
+# LiveDisplay jni
+PRODUCT_PACKAGES += \
+    libjni_livedisplay
+
 # Media
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/media_codecs.xml:system/etc/media_codecs.xml \
