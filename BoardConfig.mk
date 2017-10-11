@@ -138,13 +138,6 @@ USE_DEVICE_SPECIFIC_CAMERA := true
 # Charger
 BOARD_CHARGER_ENABLE_SUSPEND := true
 
-# CM Hardware
-BOARD_HARDWARE_CLASS += \
-    hardware/cyanogen/cmhw \
-    $(DEVICE_PATH)/cmhw
-BOARD_USES_CYANOGEN_HARDWARE := true
-TARGET_TAP_TO_WAKE_NODE :=  "/proc/touchpanel/double_tap_enable"
-
 # CNE and DPM
 BOARD_USES_QCNE := true
 
@@ -187,6 +180,10 @@ USE_DEVICE_SPECIFIC_GPS := true
 # Init
 TARGET_PLATFORM_DEVICE_BASE := /devices/soc/
 
+# Lineage Hardware
+BOARD_HARDWARE_CLASS += \
+    $(VENDOR_PATH)/lineagehw
+
 # Lights
 TARGET_PROVIDES_LIBLIGHT := true
 
@@ -207,6 +204,7 @@ BOARD_FLASH_BLOCK_SIZE := 262144 # (BOARD_KERNEL_PAGESIZE * 64)
 
 # Power
 TARGET_POWERHAL_VARIANT := qcom
+TARGET_TAP_TO_WAKE_NODE := "/proc/touchpanel/double_tap_enable"
 
 # QCOM
 BOARD_USES_QCOM_HARDWARE := true
