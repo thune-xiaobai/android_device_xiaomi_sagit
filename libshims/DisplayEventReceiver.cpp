@@ -1,4 +1,8 @@
-void _ZN7android20DisplayEventReceiverC1Ev() {}
+extern "C" void _ZN7android20DisplayEventReceiverC1ENS_16ISurfaceComposer11VsyncSourceE();
+
+extern "C" void _ZN7android20DisplayEventReceiverC1Ev() {
+    _ZN7android20DisplayEventReceiverC1ENS_16ISurfaceComposer11VsyncSourceE;
+}
 
 extern void _ZN14SkImageDecoder10DecodeFileEPKcP8SkBitmap11SkColorTypeNS_4ModeEPNS_6FormatE() {}
 

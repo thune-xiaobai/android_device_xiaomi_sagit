@@ -308,6 +308,7 @@ PRODUCT_PACKAGES += \
     librmnetctl \
     libxml2 \
     libprotobuf-cpp-full \
+    libshim_ims \
     rild_socket
 
 # SdcardFS
