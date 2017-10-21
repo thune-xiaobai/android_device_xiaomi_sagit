@@ -273,6 +273,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libjson
 
+# Qsee shim
+PRODUCT_PACKAGES += \
+    libshim_qsee
+
 # Ramdisk
 PRODUCT_PACKAGES += \
     fstab.qcom \
