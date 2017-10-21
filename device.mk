@@ -125,7 +125,8 @@ PRODUCT_PACKAGES += \
 
 # Camera
 PRODUCT_PACKAGES += \
-    libshim_camera_hal \
+    libshim_camera \
+    libshim_MiCamera \
     Snap \
     camera.device@3.2-impl \
     android.hardware.camera.provider@2.4-impl

@@ -15,26 +15,23 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-
 LOCAL_SRC_FILES := rild_socket.cpp
-
-LOCAL_C_INCLUDES := \
-    bionic/libc/include
-
+LOCAL_C_INCLUDES := bionic/libc/include
 LOCAL_SHARED_LIBRARIES := libc
-
 LOCAL_MODULE := rild_socket
 LOCAL_MODULE_TAGS := optional
-
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-
 LOCAL_SRC_FILES := DisplayEventReceiver.cpp
-
-LOCAL_MODULE := libshim_camera_hal
+LOCAL_MODULE := libshim_camera
 LOCAL_MODULE_TAGS := optional
+include $(BUILD_SHARED_LIBRARY)
 
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES := ImageDecoder.c
+LOCAL_MODULE := libshim_MiCamera
+LOCAL_MODULE_TAGS := optional
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
