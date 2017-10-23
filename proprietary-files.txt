@@ -960,7 +960,7 @@ vendor/qcril.db
 # Sensors
 bin/sensors.qcom
 etc/permissions/com.xiaomi.sensor.xml
-etc/sensors/hals.conf
+etc/sensors/hals.conf:vendor/etc/sensors/hals.conf
 etc/sensors/sensor_def_qcomdev.conf
 framework/com.xiaomi.sensor.jar
 lib64/libcalapi.so
