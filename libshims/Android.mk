@@ -46,7 +46,10 @@ LOCAL_MODULE_TAGS := optional
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_SRC_FILES := SurfaceComposerClient.cpp
+LOCAL_SRC_FILES :=  \
+	SurfaceComposerClient.cpp \
+	SurfaceControl.cpp
+
 LOCAL_SHARED_LIBRARIES := libbase libgui
 LOCAL_MODULE := libshim_qsee
 LOCAL_MODULE_TAGS := optional
