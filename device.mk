@@ -126,6 +126,9 @@ PRODUCT_PACKAGES += \
     android.hardware.bluetooth@1.0-service \
     libbt-vendor
 
+PRODUCT_PACKAGES += \
+    libbthost_if
+
 # Camera
 PRODUCT_PACKAGES += \
     Snap \
