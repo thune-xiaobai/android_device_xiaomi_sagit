@@ -58,11 +58,11 @@ extern "C" {
   fprintf(stdout,"%02d:%02d:%02d.%06ld]" format "\n", hh, mm, ss, tv.tv_usec,##x);    \
 }
 
-#define ALOGE(format, x...) TS_PRINTF(" %d E %s: " format , getpid(), LOG_TAG, ##x)
-#define ALOGW(format, x...) TS_PRINTF(" %d W %s: " format , getpid(), LOG_TAG, ##x)
-#define ALOGI(format, x...) TS_PRINTF(" %d I %s: " format , getpid(), LOG_TAG, ##x)
-#define ALOGD(format, x...) TS_PRINTF(" %d D %s: " format , getpid(), LOG_TAG, ##x)
-#define ALOGV(format, x...) TS_PRINTF(" %d V %s: " format , getpid(), LOG_TAG, ##x)
+#define ALOGE(format, x...) TS_PRINTF("E/%s (%d): " format , LOG_TAG, getpid(), ##x)
+#define ALOGW(format, x...) TS_PRINTF("W/%s (%d): " format , LOG_TAG, getpid(), ##x)
+#define ALOGI(format, x...) TS_PRINTF("I/%s (%d): " format , LOG_TAG, getpid(), ##x)
+#define ALOGD(format, x...) TS_PRINTF("D/%s (%d): " format , LOG_TAG, getpid(), ##x)
+#define ALOGV(format, x...) TS_PRINTF("V/%s (%d): " format , LOG_TAG, getpid(), ##x)
 
 #endif /* USE_GLIB */
 

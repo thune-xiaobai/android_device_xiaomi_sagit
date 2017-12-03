@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2014, 2016-2017 The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -35,7 +35,6 @@
 #include <msg_q.h>
 #include <platform_lib_log_util.h>
 #include <loc_log.h>
-#include <SystemStatus.h>
 
 namespace loc_core {
 
@@ -45,8 +44,7 @@ LocDualContext::mFgExclMask = 0;
 // excluded events for background clients
 const LOC_API_ADAPTER_EVENT_MASK_T
 LocDualContext::mBgExclMask =
-    (LOC_API_ADAPTER_BIT_PARSED_POSITION_REPORT |
-     LOC_API_ADAPTER_BIT_SATELLITE_REPORT |
+    (LOC_API_ADAPTER_BIT_SATELLITE_REPORT |
      LOC_API_ADAPTER_BIT_NMEA_1HZ_REPORT |
      LOC_API_ADAPTER_BIT_NMEA_POSITION_REPORT |
      LOC_API_ADAPTER_BIT_IOCTL_REPORT |
@@ -58,7 +56,6 @@ const MsgTask* LocDualContext::mMsgTask = NULL;
 ContextBase* LocDualContext::mFgContext = NULL;
 ContextBase* LocDualContext::mBgContext = NULL;
 ContextBase* LocDualContext::mInjectContext = NULL;
-SystemStatus* LocDualContext::mSystemStatus = NULL;
 // the name must be shorter than 15 chars
 const char* LocDualContext::mLocationHalName = "Loc_hal_worker";
 #ifndef USE_GLIB
@@ -148,16 +145,6 @@ LocDualContext::LocDualContext(const MsgTask* msgTask,
                                LOC_API_ADAPTER_EVENT_MASK_T exMask) :
     ContextBase(msgTask, exMask, mLBSLibName)
 {
-}
-
-SystemStatus* LocDualContext::getSystemStatus(void)
-{
-    pthread_mutex_lock(&LocDualContext::mGetLocContextMutex);
-    if (NULL == mSystemStatus) {
-        mSystemStatus = new SystemStatus();
-    }
-    pthread_mutex_unlock(&LocDualContext::mGetLocContextMutex);
-    return  mSystemStatus;
 }
 
 }

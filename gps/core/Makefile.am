@@ -1,10 +1,12 @@
 AM_CFLAGS = -I./ \
             -I../utils \
+            -I../location \
             $(LOCPLA_CFLAGS) \
             $(GPSUTILS_CFLAGS) \
             -I$(WORKSPACE)/gps-noship/flp \
             -D__func__=__PRETTY_FUNCTION__ \
-            -fno-short-enums
+            -fno-short-enums \
+            -std=c++11
 
 libloc_core_la_h_sources = \
            LocApiBase.h \
@@ -15,6 +17,13 @@ libloc_core_la_h_sources = \
            UlpProxyBase.h \
            loc_core_log.h \
            LocAdapterProxyBase.h \
+           data-items/DataItemId.h \
+           data-items/IDataItemCore.h \
+           observer/IDataItemObserver.h \
+           observer/IDataItemSubscription.h \
+           observer/IFrameworkActionReq.h \
+           observer/IOsObserver.h \
+           SystemStatusOsObserver.h \
            SystemStatus.h
 
 libloc_core_la_c_sources = \
@@ -23,6 +32,11 @@ libloc_core_la_c_sources = \
            ContextBase.cpp \
            LocDualContext.cpp \
            loc_core_log.cpp \
+           data-items/DataItemsFactoryProxy.cpp \
+           data-items/common/ClientIndex.cpp \
+           data-items/common/DataItemIndex.cpp \
+           data-items/common/IndexFactory.cpp \
+           SystemStatusOsObserver.cpp \
            SystemStatus.cpp
 
 library_includedir = $(pkgincludedir)/core

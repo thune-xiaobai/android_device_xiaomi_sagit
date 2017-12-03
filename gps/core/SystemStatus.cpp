@@ -1,4 +1,4 @@
-/* Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,14 +28,18 @@
  */
 #define LOG_TAG "LocSvc_SystemStatus"
 
+#include <inttypes.h>
 #include <string>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 #include <pthread.h>
 #include <platform_lib_log_util.h>
+#include <MsgTask.h>
 #include <loc_nmea.h>
+#include <DataItemsFactoryProxy.h>
 #include <SystemStatus.h>
+#include <SystemStatusOsObserver.h>
 
 namespace loc_core
 {
@@ -109,6 +113,12 @@ public:
     uint32_t mJammerBds;  // x10
     uint32_t mJammerGal;  // x11
     uint32_t mRecErrorRecovery; // x12
+    double   mAgcGps;     // x13
+    double   mAgcGlo;     // x14
+    double   mAgcBds;     // x15
+    double   mAgcGal;     // x16
+    int32_t  mLeapSeconds;// x17
+    int32_t  mLeapSecUnc; // x18
 };
 
 // parser
@@ -136,7 +146,13 @@ private:
         eJammerBds = 16,
         eJammerGal = 17,
         eRecErrorRecovery = 18,
-        eMax = eRecErrorRecovery
+        eAgcGps = 19,
+        eAgcGlo = 20,
+        eAgcBds = 21,
+        eAgcGal = 22,
+        eLeapSeconds = 23,
+        eLeapSecUnc = 24,
+        eMax
     };
     SystemStatusPQWM1 mM1;
 
@@ -158,15 +174,23 @@ public:
     inline uint32_t   getJammerGlo()  { return mM1.mJammerGlo;        }
     inline uint32_t   getJammerBds()  { return mM1.mJammerBds;        }
     inline uint32_t   getJammerGal()  { return mM1.mJammerGal;        }
+    inline uint32_t   getAgcGps()     { return mM1.mAgcGps;           }
+    inline uint32_t   getAgcGlo()     { return mM1.mAgcGlo;           }
+    inline uint32_t   getAgcBds()     { return mM1.mAgcBds;           }
+    inline uint32_t   getAgcGal()     { return mM1.mAgcGal;           }
     inline uint32_t   getRecErrorRecovery() { return mM1.mRecErrorRecovery; }
+    inline int32_t    getLeapSeconds(){ return mM1.mLeapSeconds; }
+    inline int32_t    getLeapSecUnc() { return mM1.mLeapSecUnc; }
 
     SystemStatusPQWM1parser(const char *str_in, uint32_t len_in)
         : SystemStatusNmeaBase(str_in, len_in)
     {
+        memset(&mM1, 0, sizeof(mM1));
         if (mField.size() < eMax) {
+            LOC_LOGE("PQWM1parser - invalid size=%zu", mField.size());
+            mM1.mTimeValid = 0;
             return;
         }
-        memset(&mM1, 0, sizeof(mM1));
         mM1.mGpsWeek = atoi(mField[eGpsWeek].c_str());
         mM1.mGpsTowMs = atoi(mField[eGpsTowMs].c_str());
         mM1.mTimeValid = atoi(mField[eTimeValid].c_str());
@@ -185,6 +209,12 @@ public:
         mM1.mJammerBds = atoi(mField[eJammerBds].c_str());
         mM1.mJammerGal = atoi(mField[eJammerGal].c_str());
         mM1.mRecErrorRecovery = atoi(mField[eRecErrorRecovery].c_str());
+        mM1.mAgcGps = atof(mField[eAgcGps].c_str());
+        mM1.mAgcGlo = atof(mField[eAgcGlo].c_str());
+        mM1.mAgcBds = atof(mField[eAgcBds].c_str());
+        mM1.mAgcGal = atof(mField[eAgcGal].c_str());
+        mM1.mLeapSeconds = atoi(mField[eLeapSeconds].c_str());
+        mM1.mLeapSecUnc = atoi(mField[eLeapSecUnc].c_str());
     }
 
     inline SystemStatusPQWM1& get() { return mM1;} //getparser
@@ -219,7 +249,7 @@ private:
         eEpiHepe = 6,
         eEpiAltUnc = 7,
         eEpiSrc = 8,
-        eMax = eEpiSrc
+        eMax
     };
     SystemStatusPQWP1 mP1;
 
@@ -276,7 +306,7 @@ private:
         eBestAlt = 4,
         eBestHepe = 5,
         eBestAltUnc = 6,
-        eMax = eBestAltUnc
+        eMax
     };
     SystemStatusPQWP2 mP2;
 
@@ -341,7 +371,7 @@ private:
         eBdsXtraValid = 10,
         eGalXtraValid = 11,
         eQzssXtraValid = 12,
-        eMax = eQzssXtraValid
+        eMax
     };
     SystemStatusPQWP3 mP3;
 
@@ -406,7 +436,7 @@ private:
         eBdsEpheValid = 4,
         eGalEpheValid = 5,
         eQzssEpheValid = 6,
-        eMax = eQzssEpheValid
+        eMax
     };
     SystemStatusPQWP4 mP4;
 
@@ -479,7 +509,7 @@ private:
         eBdsBadMask = 14,
         eGalBadMask = 15,
         eQzssBadMask = 16,
-        eMax = eQzssBadMask
+        eMax
     };
     SystemStatusPQWP5 mP5;
 
@@ -544,7 +574,7 @@ private:
         eTalker = 0,
         eUtcTime = 1,
         eFixInfoMask = 2,
-        eMax = eFixInfoMask
+        eMax
     };
     SystemStatusPQWP6 mP6;
 
@@ -562,6 +592,44 @@ public:
     }
 
     inline SystemStatusPQWP6& get() { return mP6;}
+};
+
+/******************************************************************************
+ SystemStatusPQWP7parser
+******************************************************************************/
+class SystemStatusPQWP7
+{
+public:
+    SystemStatusNav mNav[SV_ALL_NUM];
+};
+
+class SystemStatusPQWP7parser : public SystemStatusNmeaBase
+{
+private:
+    enum
+    {
+        eTalker = 0,
+        eUtcTime = 1,
+        eMax = 2 + SV_ALL_NUM*3
+    };
+    SystemStatusPQWP7 mP7;
+
+public:
+    SystemStatusPQWP7parser(const char *str_in, uint32_t len_in)
+        : SystemStatusNmeaBase(str_in, len_in)
+    {
+        if (mField.size() < eMax) {
+            LOC_LOGE("PQWP7parser - invalid size=%zu", mField.size());
+            return;
+        }
+        for (uint32_t i=0; i<SV_ALL_NUM; i++) {
+            mP7.mNav[i].mType   = GnssEphemerisType(atoi(mField[i*3+2].c_str()));
+            mP7.mNav[i].mSource = GnssEphemerisSource(atoi(mField[i*3+3].c_str()));
+            mP7.mNav[i].mAgeSec = atoi(mField[i*3+4].c_str());
+        }
+    }
+
+    inline SystemStatusPQWP7& get() { return mP7;}
 };
 
 /******************************************************************************
@@ -583,7 +651,7 @@ private:
         eUtcTime = 1,
         eFixInfoMask = 2,
         eHepeLimit = 3,
-        eMax = eHepeLimit
+        eMax
     };
     SystemStatusPQWS1 mS1;
 
@@ -615,7 +683,9 @@ SystemStatusTimeAndClock::SystemStatusTimeAndClock(const SystemStatusPQWM1& nmea
     mTimeSource(nmea.mTimeSource),
     mTimeUnc(nmea.mTimeUnc),
     mClockFreqBias(nmea.mClockFreqBias),
-    mClockFreqBiasUnc(nmea.mClockFreqBiasUnc)
+    mClockFreqBiasUnc(nmea.mClockFreqBiasUnc),
+    mLeapSeconds(nmea.mLeapSeconds),
+    mLeapSecUnc(nmea.mLeapSecUnc)
 {
 }
 
@@ -627,7 +697,9 @@ bool SystemStatusTimeAndClock::equals(SystemStatusTimeAndClock& peer)
         (mTimeSource != peer.mTimeSource) ||
         (mTimeUnc != peer.mTimeUnc) ||
         (mClockFreqBias != peer.mClockFreqBias) ||
-        (mClockFreqBiasUnc != peer.mClockFreqBiasUnc)) {
+        (mClockFreqBiasUnc != peer.mClockFreqBiasUnc) ||
+        (mLeapSeconds != peer.mLeapSeconds) ||
+        (mLeapSecUnc != peer.mLeapSecUnc)) {
         return false;
     }
     return true;
@@ -635,7 +707,7 @@ bool SystemStatusTimeAndClock::equals(SystemStatusTimeAndClock& peer)
 
 void SystemStatusTimeAndClock::dump()
 {
-    LOC_LOGV("TimeAndClock: u=%ld:%ld g=%d:%d v=%d s=%d u=%d b=%d bu=%d",
+    LOC_LOGV("TimeAndClock: u=%ld:%ld g=%d:%d v=%d ts=%d tu=%d b=%d bu=%d ls=%d lu=%d",
              mUtcTime.tv_sec, mUtcTime.tv_nsec,
              mGpsWeek,
              mGpsTowMs,
@@ -643,7 +715,9 @@ void SystemStatusTimeAndClock::dump()
              mTimeSource,
              mTimeUnc,
              mClockFreqBias,
-             mClockFreqBiasUnc);
+             mClockFreqBiasUnc,
+             mLeapSeconds,
+             mLeapSecUnc);
     return;
 }
 
@@ -683,7 +757,11 @@ SystemStatusRfAndParams::SystemStatusRfAndParams(const SystemStatusPQWM1& nmea) 
     mJammerGps(nmea.mJammerGps),
     mJammerGlo(nmea.mJammerGlo),
     mJammerBds(nmea.mJammerBds),
-    mJammerGal(nmea.mJammerGal)
+    mJammerGal(nmea.mJammerGal),
+    mAgcGps(nmea.mAgcGps),
+    mAgcGlo(nmea.mAgcGlo),
+    mAgcBds(nmea.mAgcBds),
+    mAgcGal(nmea.mAgcGal)
 {
 }
 
@@ -697,7 +775,11 @@ bool SystemStatusRfAndParams::equals(SystemStatusRfAndParams& peer)
         (mJammerGps != peer.mJammerGps) ||
         (mJammerGlo != peer.mJammerGlo) ||
         (mJammerBds != peer.mJammerBds) ||
-        (mJammerGal != peer.mJammerGal)) {
+        (mJammerGal != peer.mJammerGal) ||
+        (mAgcGps != peer.mAgcGps) ||
+        (mAgcGlo != peer.mAgcGlo) ||
+        (mAgcBds != peer.mAgcBds) ||
+        (mAgcGal != peer.mAgcGal)) {
         return false;
     }
     return true;
@@ -705,7 +787,9 @@ bool SystemStatusRfAndParams::equals(SystemStatusRfAndParams& peer)
 
 void SystemStatusRfAndParams::dump()
 {
-    LOC_LOGV("RfAndParams: u=%ld:%ld p=%d bi=%d bq=%d ai=%d aq=%d gp=%d gl=%d bd=%d ga=%d",
+    LOC_LOGV("RfAndParams: u=%ld:%ld p=%d bi=%d bq=%d ai=%d aq=%d "
+             "jgp=%d jgl=%d jbd=%d jga=%d "
+             "agp=%lf agl=%lf abd=%lf aga=%lf",
              mUtcTime.tv_sec, mUtcTime.tv_nsec,
              mPgaGain,
              mGpsBpAmpI,
@@ -715,7 +799,11 @@ void SystemStatusRfAndParams::dump()
              mJammerGps,
              mJammerGlo,
              mJammerBds,
-             mJammerGal);
+             mJammerGal,
+             mAgcGps,
+             mAgcGlo,
+             mAgcBds,
+             mAgcGal);
     return;
 }
 
@@ -789,6 +877,7 @@ void SystemStatusInjectedPosition::dump()
  SystemStatusBestPosition
 ******************************************************************************/
 SystemStatusBestPosition::SystemStatusBestPosition(const SystemStatusPQWP2& nmea) :
+    mValid(true),
     mBestLat(nmea.mBestLat),
     mBestLon(nmea.mBestLon),
     mBestAlt(nmea.mBestAlt),
@@ -859,7 +948,7 @@ bool SystemStatusXtra::equals(SystemStatusXtra& peer)
 
 void SystemStatusXtra::dump()
 {
-    LOC_LOGV("SystemStatusXtra: u=%ld:%ld m=%x a=%d:%d:%d:%d:%d v=%x:%x:%x:%x:%x",
+    LOC_LOGV("SystemStatusXtra: u=%ld:%ld m=%x a=%d:%d:%d:%d:%d v=%x:%x:%" PRIx64 ":%" PRIx64":%x",
              mUtcTime.tv_sec, mUtcTime.tv_nsec,
              mXtraValidMask,
              mGpsXtraAge,
@@ -901,7 +990,7 @@ bool SystemStatusEphemeris::equals(SystemStatusEphemeris& peer)
 
 void SystemStatusEphemeris::dump()
 {
-    LOC_LOGV("Ephemeris: u=%ld:%ld ev=%x:%x:%x:%x:%x",
+    LOC_LOGV("Ephemeris: u=%ld:%ld ev=%x:%x:%" PRIx64 ":%" PRIx64 ":%x",
              mUtcTime.tv_sec, mUtcTime.tv_nsec,
              mGpsEpheValid,
              mGloEpheValid,
@@ -957,7 +1046,10 @@ bool SystemStatusSvHealth::equals(SystemStatusSvHealth& peer)
 
 void SystemStatusSvHealth::dump()
 {
-    LOC_LOGV("SvHealth: u=%ld:%ld u=%x:%x:%x:%x:%x g=%x:%x:%x:%x:%x b=%x:%x:%x:%x:%x",
+    LOC_LOGV("SvHealth: u=%ld:%ld \
+             u=%x:%x:%" PRIx64 ":%" PRIx64 ":%x \
+             g=%x:%x:%" PRIx64 ":%" PRIx64 ":%x \
+             b=%x:%x:%" PRIx64 ":%" PRIx64 ":%x",
              mUtcTime.tv_sec, mUtcTime.tv_nsec,
              mGpsUnknownMask,
              mGloUnknownMask,
@@ -1002,6 +1094,39 @@ void SystemStatusPdr::dump()
 }
 
 /******************************************************************************
+ SystemStatusNavData
+******************************************************************************/
+SystemStatusNavData::SystemStatusNavData(const SystemStatusPQWP7& nmea)
+{
+    for (uint32_t i=0; i<SV_ALL_NUM; i++) {
+        mNav[i] = nmea.mNav[i];
+    }
+}
+
+bool SystemStatusNavData::equals(SystemStatusNavData& peer)
+{
+    for (uint32_t i=0; i<SV_ALL_NUM; i++) {
+        if ((mNav[i].mType != peer.mNav[i].mType) ||
+            (mNav[i].mSource != peer.mNav[i].mSource) ||
+            (mNav[i].mAgeSec != peer.mNav[i].mAgeSec)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void SystemStatusNavData::dump()
+{
+    LOC_LOGV("NavData: u=%ld:%ld",
+            mUtcTime.tv_sec, mUtcTime.tv_nsec);
+    for (uint32_t i=0; i<SV_ALL_NUM; i++) {
+        LOC_LOGV("i=%d type=%d src=%d age=%d",
+            i, mNav[i].mType, mNav[i].mSource, mNav[i].mAgeSec);
+    }
+    return;
+}
+
+/******************************************************************************
  SystemStatusPositionFailure
 ******************************************************************************/
 SystemStatusPositionFailure::SystemStatusPositionFailure(const SystemStatusPQWS1& nmea) :
@@ -1029,12 +1154,72 @@ void SystemStatusPositionFailure::dump()
 }
 
 /******************************************************************************
+ SystemStatusLocation
+******************************************************************************/
+bool SystemStatusLocation::equals(SystemStatusLocation& peer)
+{
+    if ((mLocation.gpsLocation.latitude != peer.mLocation.gpsLocation.latitude) ||
+        (mLocation.gpsLocation.longitude != peer.mLocation.gpsLocation.longitude) ||
+        (mLocation.gpsLocation.altitude != peer.mLocation.gpsLocation.altitude)) {
+        return false;
+    }
+    return true;
+}
+
+void SystemStatusLocation::dump()
+{
+    LOC_LOGV("Location: lat=%f lon=%f alt=%f spd=%f",
+             mLocation.gpsLocation.latitude,
+             mLocation.gpsLocation.longitude,
+             mLocation.gpsLocation.altitude,
+             mLocation.gpsLocation.speed);
+    return;
+}
+
+/******************************************************************************
  SystemStatus
 ******************************************************************************/
-pthread_mutex_t SystemStatus::mMutexSystemStatus = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t   SystemStatus::mMutexSystemStatus = PTHREAD_MUTEX_INITIALIZER;
+SystemStatus*     SystemStatus::mInstance = NULL;
 
-SystemStatus::SystemStatus()
+SystemStatus* SystemStatus::getInstance(const MsgTask* msgTask)
 {
+    pthread_mutex_lock(&mMutexSystemStatus);
+
+    if (!mInstance) {
+        // Instantiating for the first time. msgTask should not be NULL
+        if (msgTask == NULL) {
+            LOC_LOGE("SystemStatus: msgTask is NULL!!");
+            pthread_mutex_unlock(&mMutexSystemStatus);
+            return NULL;
+        }
+        mInstance = new (nothrow) SystemStatus(msgTask);
+        LOC_LOGD("SystemStatus::getInstance:%p. Msgtask:%p", mInstance, msgTask);
+    }
+
+    pthread_mutex_unlock(&mMutexSystemStatus);
+    return mInstance;
+}
+
+void SystemStatus::destroyInstance()
+{
+    delete mInstance;
+    mInstance = NULL;
+}
+
+IOsObserver* SystemStatus::getOsObserver()
+{
+    return &mSysStatusObsvr;
+}
+
+SystemStatus::SystemStatus(const MsgTask* msgTask) :
+    mSysStatusObsvr(msgTask),
+    mConnected(false)
+{
+    int result = 0;
+    ENTRY_LOG ();
+    mCache.mLocation.clear();
+
     mCache.mTimeAndClock.clear();
     mCache.mXoState.clear();
     mCache.mRfAndParams.clear();
@@ -1046,7 +1231,11 @@ SystemStatus::SystemStatus()
     mCache.mEphemeris.clear();
     mCache.mSvHealth.clear();
     mCache.mPdr.clear();
+    mCache.mNavData.clear();
+
     mCache.mPositionFailure.clear();
+
+    EXIT_LOG_WITH_ERROR ("%d",result);
 }
 
 /******************************************************************************
@@ -1195,6 +1384,20 @@ bool SystemStatus::setPdr(const SystemStatusPQWP6& nmea)
     return true;
 }
 
+bool SystemStatus::setNavData(const SystemStatusPQWP7& nmea)
+{
+    SystemStatusNavData s(nmea);
+    if (!mCache.mNavData.empty() && mCache.mNavData.back().equals(s)) {
+        mCache.mNavData.back().mUtcReported = s.mUtcReported;
+    } else {
+        mCache.mNavData.push_back(s);
+        if (mCache.mNavData.size() > maxNavData) {
+            mCache.mNavData.erase(mCache.mNavData.begin());
+        }
+    }
+    return true;
+}
+
 /******************************************************************************
  SystemStatus - Sx functions
 ******************************************************************************/
@@ -1207,6 +1410,28 @@ bool SystemStatus::setPositionFailure(const SystemStatusPQWS1& nmea)
         mCache.mPositionFailure.push_back(s);
         if (mCache.mPositionFailure.size() > maxPositionFailure) {
             mCache.mPositionFailure.erase(mCache.mPositionFailure.begin());
+        }
+    }
+    return true;
+}
+
+/******************************************************************************
+ SystemStatus - storing dataitems
+******************************************************************************/
+bool SystemStatus::setNetworkInfo(IDataItemCore* dataitem)
+{
+    SystemStatusNetworkInfo* data = reinterpret_cast<SystemStatusNetworkInfo*>(dataitem);
+    SystemStatusNetworkInfo s(data->mType,data->mTypeName,data->mSubTypeName,
+                              data->mAvailable,data->mConnected,data->mRoaming);
+    s.dump();
+    mConnected = data->mConnected;
+
+    if (!mCache.mNetworkInfo.empty() && mCache.mNetworkInfo.back().equals(s)) {
+        mCache.mNetworkInfo.back().mUtcReported = s.mUtcReported;
+    } else {
+        mCache.mNetworkInfo.push_back(s);
+        if (mCache.mNetworkInfo.size() > maxNetworkInfo) {
+            mCache.mNetworkInfo.erase(mCache.mNetworkInfo.begin());
         }
     }
     return true;
@@ -1228,6 +1453,7 @@ static uint32_t cnt_p3 = 0;
 static uint32_t cnt_p4 = 0;
 static uint32_t cnt_p5 = 0;
 static uint32_t cnt_p6 = 0;
+static uint32_t cnt_p7 = 0;
 static uint32_t cnt_s1 = 0;
 
 bool SystemStatus::setNmeaString(const char *data, uint32_t len)
@@ -1275,6 +1501,10 @@ bool SystemStatus::setNmeaString(const char *data, uint32_t len)
         ret = setPdr(SystemStatusPQWP6parser(buf, len).get());
         cnt_p6++;
     }
+    else if (0 == strncmp(data, "$PQWP7", SystemStatusNmeaBase::NMEA_MINSIZE)) {
+        ret = setNavData(SystemStatusPQWP7parser(buf, len).get());
+        cnt_p7++;
+    }
     else if (0 == strncmp(data, "$PQWS1", SystemStatusNmeaBase::NMEA_MINSIZE)) {
         ret = setPositionFailure(SystemStatusPQWS1parser(buf, len).get());
         cnt_s1++;
@@ -1283,7 +1513,7 @@ bool SystemStatus::setNmeaString(const char *data, uint32_t len)
         // do nothing
     }
     cnt++;
-    LOC_LOGV("setNmeaString: cnt=%d M:%d 1:%d 2:%d 3:%d 4:%d 5:%d 6:%d S:%d",
+    LOC_LOGV("setNmeaString: cnt=%d M:%d 1:%d 2:%d 3:%d 4:%d 5:%d 6:%d 7:%d S:%d",
              cnt,
              cnt_m1,
              cnt_p1,
@@ -1292,10 +1522,59 @@ bool SystemStatus::setNmeaString(const char *data, uint32_t len)
              cnt_p4,
              cnt_p5,
              cnt_p6,
+             cnt_p7,
              cnt_s1);
 
     pthread_mutex_unlock(&mMutexSystemStatus);
     return ret;
+}
+
+/******************************************************************************
+@brief      API to set report position data into internal buffer
+
+@param[In]  UlpLocation
+
+@return     true when successfully done
+******************************************************************************/
+bool SystemStatus::eventPosition(const UlpLocation& location,
+                                 const GpsLocationExtended& locationEx)
+{
+    SystemStatusLocation s(location, locationEx);
+    if (!mCache.mLocation.empty() && mCache.mLocation.back().equals(s)) {
+        mCache.mLocation.back().mUtcReported = s.mUtcReported;
+    }
+    else {
+        mCache.mLocation.push_back(s);
+        if (mCache.mLocation.size() > maxLocation) {
+            mCache.mLocation.erase(mCache.mLocation.begin());
+        }
+    }
+    LOC_LOGV("eventPosition - lat=%f lon=%f alt=%f speed=%f",
+             s.mLocation.gpsLocation.latitude,
+             s.mLocation.gpsLocation.longitude,
+             s.mLocation.gpsLocation.altitude,
+             s.mLocation.gpsLocation.speed);
+    return true;
+}
+
+/******************************************************************************
+@brief      API to set report DataItem event into internal buffer
+
+@param[In]  DataItem
+
+@return     true when successfully done
+******************************************************************************/
+bool SystemStatus::eventDataItemNotify(IDataItemCore* dataitem)
+{
+    pthread_mutex_lock(&mMutexSystemStatus);
+    switch(dataitem->getId())
+    {
+        case NETWORKINFO_DATA_ITEM_ID:
+            setNetworkInfo(dataitem);
+            break;
+    }
+    pthread_mutex_unlock(&mMutexSystemStatus);
+    return true;
 }
 
 /******************************************************************************
@@ -1312,6 +1591,12 @@ bool SystemStatus::getReport(SystemStatusReports& report, bool isLatestOnly) con
 
     if (isLatestOnly) {
         // push back only the latest report and return it
+        report.mLocation.clear();
+        if (mCache.mLocation.size() >= 1) {
+            report.mLocation.push_back(mCache.mLocation.back());
+            report.mLocation.back().dump();
+        }
+
         report.mTimeAndClock.clear();
         if (mCache.mTimeAndClock.size() >= 1) {
             report.mTimeAndClock.push_back(mCache.mTimeAndClock.back());
@@ -1363,6 +1648,12 @@ bool SystemStatus::getReport(SystemStatusReports& report, bool isLatestOnly) con
             report.mPdr.push_back(mCache.mPdr.back());
             report.mPdr.back().dump();
         }
+        report.mNavData.clear();
+        if (mCache.mNavData.size() >= 1) {
+            report.mNavData.push_back(mCache.mNavData.back());
+            report.mNavData.back().dump();
+        }
+
         report.mPositionFailure.clear();
         if (mCache.mPositionFailure.size() >= 1) {
             report.mPositionFailure.push_back(mCache.mPositionFailure.back());
@@ -1371,6 +1662,8 @@ bool SystemStatus::getReport(SystemStatusReports& report, bool isLatestOnly) con
     }
     else {
         // copy entire reports and return them
+        report.mLocation.clear();
+
         report.mTimeAndClock.clear();
         report.mXoState.clear();
         report.mRfAndParams.clear();
@@ -1382,11 +1675,112 @@ bool SystemStatus::getReport(SystemStatusReports& report, bool isLatestOnly) con
         report.mEphemeris.clear();
         report.mSvHealth.clear();
         report.mPdr.clear();
+        report.mNavData.clear();
+
         report.mPositionFailure.clear();
         report = mCache;
     }
 
     pthread_mutex_unlock(&mMutexSystemStatus);
+    return true;
+}
+
+/******************************************************************************
+@brief      API to set default report data
+
+@param[In]  none
+
+@return     true when successfully done
+******************************************************************************/
+bool SystemStatus::setDefaultReport(void)
+{
+    pthread_mutex_lock(&mMutexSystemStatus);
+
+    mCache.mLocation.push_back(SystemStatusLocation());
+    if (mCache.mLocation.size() > maxLocation) {
+        mCache.mLocation.erase(mCache.mLocation.begin());
+    }
+
+    mCache.mTimeAndClock.push_back(SystemStatusTimeAndClock());
+    if (mCache.mTimeAndClock.size() > maxTimeAndClock) {
+        mCache.mTimeAndClock.erase(mCache.mTimeAndClock.begin());
+    }
+    mCache.mXoState.push_back(SystemStatusXoState());
+    if (mCache.mXoState.size() > maxXoState) {
+        mCache.mXoState.erase(mCache.mXoState.begin());
+    }
+    mCache.mRfAndParams.push_back(SystemStatusRfAndParams());
+    if (mCache.mRfAndParams.size() > maxRfAndParams) {
+        mCache.mRfAndParams.erase(mCache.mRfAndParams.begin());
+    }
+    mCache.mErrRecovery.push_back(SystemStatusErrRecovery());
+    if (mCache.mErrRecovery.size() > maxErrRecovery) {
+        mCache.mErrRecovery.erase(mCache.mErrRecovery.begin());
+    }
+
+    mCache.mInjectedPosition.push_back(SystemStatusInjectedPosition());
+    if (mCache.mInjectedPosition.size() > maxInjectedPosition) {
+        mCache.mInjectedPosition.erase(mCache.mInjectedPosition.begin());
+    }
+    mCache.mBestPosition.push_back(SystemStatusBestPosition());
+    if (mCache.mBestPosition.size() > maxBestPosition) {
+        mCache.mBestPosition.erase(mCache.mBestPosition.begin());
+    }
+    mCache.mXtra.push_back(SystemStatusXtra());
+    if (mCache.mXtra.size() > maxXtra) {
+        mCache.mXtra.erase(mCache.mXtra.begin());
+    }
+    mCache.mEphemeris.push_back(SystemStatusEphemeris());
+    if (mCache.mEphemeris.size() > maxEphemeris) {
+        mCache.mEphemeris.erase(mCache.mEphemeris.begin());
+    }
+    mCache.mSvHealth.push_back(SystemStatusSvHealth());
+    if (mCache.mSvHealth.size() > maxSvHealth) {
+        mCache.mSvHealth.erase(mCache.mSvHealth.begin());
+    }
+    mCache.mPdr.push_back(SystemStatusPdr());
+    if (mCache.mPdr.size() > maxPdr) {
+        mCache.mPdr.erase(mCache.mPdr.begin());
+    }
+    mCache.mNavData.push_back(SystemStatusNavData());
+    if (mCache.mNavData.size() > maxNavData) {
+        mCache.mNavData.erase(mCache.mNavData.begin());
+    }
+
+    mCache.mPositionFailure.push_back(SystemStatusPositionFailure());
+    if (mCache.mPositionFailure.size() > maxPositionFailure) {
+        mCache.mPositionFailure.erase(mCache.mPositionFailure.begin());
+    }
+
+    pthread_mutex_unlock(&mMutexSystemStatus);
+    return true;
+}
+
+/******************************************************************************
+@brief      API to handle connection status update event from GnssRil
+
+@param[In]  Connection status
+
+@return     true when successfully done
+******************************************************************************/
+bool SystemStatus::eventConnectionStatus(bool connected, uint8_t type)
+{
+    if (connected != mConnected) {
+        mConnected = connected;
+
+        // send networkinof dataitem to systemstatus observer clients
+        SystemStatusNetworkInfo s(type, "", "", false, connected, false);
+        IDataItemCore *networkinfo =
+                DataItemsFactoryProxy::createNewDataItem(NETWORKINFO_DATA_ITEM_ID);
+        if (nullptr == networkinfo) {
+            LOC_LOGE("Unable to create dataitemd");
+            return false;
+        }
+        networkinfo->copy(&s);
+        list<IDataItemCore*> dl(0);
+        dl.push_back(networkinfo);
+        mSysStatusObsvr.notify(dl);
+    }
     return true;
 }
 
