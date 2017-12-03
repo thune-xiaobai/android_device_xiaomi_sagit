@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2013, 2016-2017 The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -30,13 +30,13 @@
 #ifndef LOC_CORE_LOG_H
 #define LOC_CORE_LOG_H
 
+#include <ctype.h>
+#include <gps_extended.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include <ctype.h>
-#include <gps_extended.h>
 
 const char* loc_get_gps_status_name(LocGpsStatusValue gps_status);
 const char* loc_get_position_mode_name(LocGpsPositionMode mode);

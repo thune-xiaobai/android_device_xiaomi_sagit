@@ -1,4 +1,4 @@
-/* Copyright (c) 2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2013, 2015-2017 The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -35,8 +35,7 @@
 #include <string>
 #define NMEA_SENTENCE_MAX_LENGTH 200
 
-void loc_nmea_generate_sv(const LocGnssSvStatus &svStatus,
-                              const GpsLocationExtended &locationExtended,
+void loc_nmea_generate_sv(const GnssSvNotification &svNotify,
                               std::vector<std::string> &nmeaArraystr);
 
 void loc_nmea_generate_pos(const UlpLocation &location,
@@ -45,9 +44,9 @@ void loc_nmea_generate_pos(const UlpLocation &location,
                                std::vector<std::string> &nmeaArraystr);
 
 #define DEBUG_NMEA_MINSIZE 6
-#define DEBUG_NMEA_MAXSIZE 256
+#define DEBUG_NMEA_MAXSIZE 4096
 inline bool loc_nmea_is_debug(const char* nmea, int length) {
-    return ((NULL != nmea) &&
+    return ((nullptr != nmea) &&
             (length >= DEBUG_NMEA_MINSIZE) && (length <= DEBUG_NMEA_MAXSIZE) &&
             (nmea[0] == '$') && (nmea[1] == 'P') && (nmea[2] == 'Q') && (nmea[3] == 'W'));
 }
