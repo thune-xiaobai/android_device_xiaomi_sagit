@@ -40,6 +40,7 @@
 using android::base::GetProperty;
 using android::base::ReadFileToString;
 using android::base::Trim;
+using android::init::property_set;
 
 char const *heapminfree;
 char const *heapmaxfree;
