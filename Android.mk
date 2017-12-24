@@ -24,13 +24,6 @@ LOCAL_PATH := $(call my-dir)
 ifeq ($(TARGET_DEVICE),sagit)
 include $(call all-makefiles-under,$(LOCAL_PATH))
 
-# Create a link for the WCNSS config file
-$(shell mkdir -p $(TARGET_OUT)/etc/firmware/wlan/qca_cld; \
-    ln -sf /system/etc/wifi/WCNSS_qcom_cfg.ini \
-	    $(TARGET_OUT)/etc/firmware/wlan/qca_cld/WCNSS_qcom_cfg.ini; \
-    ln -sf /persist/wlan_mac.bin \
-	    $(TARGET_OUT_ETC)/firmware/wlan/qca_cld/wlan_mac.bin)
-
 # GPS symlinks
 $(shell ln -s /system/vendor/etc/gps.conf $(TARGET_OUT_ETC)/gps.conf)
 
@@ -85,6 +78,22 @@ $(shell ln -s /persist/rfs/shared $(TARGET_OUT)/rfs/apq/gnss/shared)
 $(shell ln -s /persist/hlos_rfs/shared $(TARGET_OUT)/rfs/apq/gnss/hlos)
 $(shell ln -s /firmware $(TARGET_OUT)/rfs/apq/gnss/readonly/firmware)
 # END RFS folder structure
+
+WCNSS_INI_SYMLINK := $(TARGET_OUT_VENDOR)/firmware/wlan/qca_cld/WCNSS_qcom_cfg.ini
+$(WCNSS_INI_SYMLINK): $(LOCAL_INSTALLED_MODULE)
+	@echo "WCNSS config ini link: $@"
+	@mkdir -p $(dir $@)
+	@rm -rf $@
+	$(hide) ln -sf /vendor/etc/wifi/$(notdir $@) $@
+
+WCNSS_MAC_SYMLINK := $(TARGET_OUT_VENDOR)/firmware/wlan/qca_cld/wlan_mac.bin
+$(WCNSS_MAC_SYMLINK): $(LOCAL_INSTALLED_MODULE)
+	@echo "WCNSS MAC bin link: $@"
+	@mkdir -p $(dir $@)
+	@rm -rf $@
+	$(hide) ln -sf /persist/$(notdir $@) $@
+
+ALL_DEFAULT_INSTALLED_MODULES += $(WCNSS_INI_SYMLINK) $(WCNSS_MAC_SYMLINK)
 
 BT_FIRMWARE := btfw32.tlv btnv32.bin btnv32.b15
 BT_FIRMWARE_SYMLINKS := $(addprefix $(TARGET_OUT_VENDOR)/firmware/,$(notdir $(BT_FIRMWARE)))
