@@ -689,6 +689,7 @@ service ipacm /system/vendor/bin/ipacm
     class main
     user radio
     group radio inet
+    disabled
 
 service qti /system/vendor/bin/qti
     class main
