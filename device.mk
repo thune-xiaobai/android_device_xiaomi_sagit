@@ -362,6 +362,7 @@ PRODUCT_PACKAGES += \
 # RIL
 PRODUCT_PACKAGES += \
     android.hardware.broadcastradio@1.0-impl \
+    ims-ext-common \
     librmnetctl \
     libxml2 \
     libprotobuf-cpp-full
