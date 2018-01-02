@@ -323,10 +323,6 @@ PRODUCT_PACKAGES += \
     libxml2 \
     libprotobuf-cpp-full
 
-# SdcardFS
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.sys.sdcardfs=1
-
 # Sensors
 PRODUCT_PACKAGES += \
     android.hardware.sensors@1.0-impl \
