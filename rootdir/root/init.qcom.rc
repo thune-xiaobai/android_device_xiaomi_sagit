@@ -608,6 +608,18 @@ service start_hci_filter /system/vendor/bin/wcnss_filter
     seclabel u:r:bluetooth:s0
     disabled
 
+on property:wc_transport.start_root=true
+    start hci_filter_root
+
+on property:wc_transport.start_root=false
+    stop hci_filter_root
+
+service hci_filter_root /system/bin/wcnss_filter
+    class late_start
+    user bluetooth
+    group bluetooth oem_2950 system
+    disabled
+
 service bt-dun /system/bin/dun-server /dev/smd7 /dev/rfcomm0
     class late_start
     user bluetooth
