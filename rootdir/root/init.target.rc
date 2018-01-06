@@ -43,6 +43,8 @@ on init
     write /dev/stune/system-background/schedtune.colocate 0
     write /dev/stune/foreground/schedtune.colocate 0
     write /dev/stune/top-app/schedtune.colocate 1
+    # Goodix fingerprint
+    chown system system /dev/goodix_fp
     write /sys/module/qpnp_rtc/parameters/poweron_alarm 1
 
     write /sys/devices/soc/c179000.i2c/i2c-5/5-0020/input/input1/reversed_keys 1
@@ -87,6 +89,14 @@ on post-fs-data
     mkdir /data/thermal/config 0771 system system
     chown system system /dev/sysmatdrv
     chmod 0660 /dev/sysmatdrv
+
+    mkdir /data/vendor/hbtp 0750 system system
+    mkdir /persist/qti_fp 0700 system system
+    mkdir /data/misc/seemp 0700 system system
+    mkdir /data/misc/fpc 0770 system system
+    mkdir /data/misc/goodix 0770 system system
+    mkdir /persist/fpc 0770 system system
+
 #QDCM config file for sagit
     copy /system/etc/calib.cfg /data/vendor/display/calib.cfg
     copy /system/etc/qdcm_calib_data_jdi_fhd_cmd_incell_dsi_panel.xml /data/vendor/display/qdcm_calib_data_jdi_fhd_cmd_incell_dsi_panel.xml
@@ -147,6 +157,21 @@ on boot
    chown system system /persist/speccfg/vendor_persist.prop
    chown system system /persist/speccfg/submask
    chown system system /persist/speccfg/partition
+
+   chown system system /sys/bus/platform/devices/soc:fingerprint_fpc/irq
+   chown system system /sys/bus/platform/devices/soc:fingerprint_fpc/irq_enable
+   chown system system /sys/bus/platform/devices/soc:fingerprint_fpc/wakeup_enable
+   chown system system /sys/bus/platform/devices/soc:fingerprint_fpc/hw_reset
+   chown system system /sys/bus/platform/devices/soc:fingerprint_fpc/device_prepare
+   chown system system /sys/bus/platform/devices/soc:fingerprint_fpc/fingerdown_wait
+   chown system system /sys/bus/platform/devices/soc:fingerprint_fpc/vendor
+   chown system system /data/misc/fpc/calibration_image.pndat
+   chmod 0700 /sys/bus/platform/devices/soc:fingerprint_fpc/irq
+   chmod 0700 /sys/bus/platform/devices/soc:fingerprint_fpc/wakeup_enable
+   chmod 0700 /sys/bus/platform/devices/soc:fingerprint_fpc/hw_reset
+   chmod 0700 /sys/bus/platform/devices/soc:fingerprint_fpc/device_prepare
+   chmod 0700 /sys/bus/platform/devices/soc:fingerprint_fpc/vendor
+   chmod 0600 /data/misc/fpc/calibration_image.pndat
 
 # access permission for Speaker SmartPA
     chmod 0666 /dev/i2c-10
