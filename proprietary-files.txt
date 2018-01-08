@@ -1100,6 +1100,37 @@ lib/vendor.qti.hardware.iop@1.0.so
 lib/vendor.qti.esepowermanager@1.0.so
 lib/vendor.qti.hardware.perf@1.0.so
 
+# Improvetouch
+vendor/bin/hbtp_daemon
+lib/libhbtpjni.so
+lib/vendor.qti.hardware.improvetouch.touchcompanion@1.0.so
+lib/vendor.qti.hardware.improvetouch.blobmanager@1.0.so
+lib/vendor.qti.hardware.improvetouch.gesturemanager@1.0.so
+lib64/libhbtpjni.so
+lib64/vendor.qti.hardware.improvetouch.touchcompanion@1.0.so
+lib64/vendor.qti.hardware.improvetouch.blobmanager@1.0.so
+lib64/vendor.qti.hardware.improvetouch.gesturemanager@1.0.so
+vendor/etc/hbtp/hbtpcfg.dat
+vendor/etc/hbtp/hbtpcfg2.dat
+vendor/lib/libhbtpclient.so
+vendor/lib/libhbtpfrmwk.so
+vendor/lib/libhbtpdsp.so
+vendor/lib/vendor.qti.hardware.improvetouch.blobmanager@1.0-service.so
+vendor/lib/vendor.qti.hardware.improvetouch.blobmanager@1.0_vendor.so
+vendor/lib/vendor.qti.hardware.improvetouch.gesturemanager@1.0-service.so
+vendor/lib/vendor.qti.hardware.improvetouch.gesturemanager@1.0_vendor.so
+vendor/lib/vendor.qti.hardware.improvetouch.touchcompanion@1.0-service.so
+vendor/lib/vendor.qti.hardware.improvetouch.touchcompanion@1.0_vendor.so
+vendor/lib64/libhbtpclient.so
+vendor/lib64/libhbtpfrmwk.so
+vendor/lib64/libhbtpdsp.so
+vendor/lib64/vendor.qti.hardware.improvetouch.blobmanager@1.0-service.so
+vendor/lib64/vendor.qti.hardware.improvetouch.blobmanager@1.0_vendor.so
+vendor/lib64/vendor.qti.hardware.improvetouch.gesturemanager@1.0-service.so
+vendor/lib64/vendor.qti.hardware.improvetouch.gesturemanager@1.0_vendor.so
+vendor/lib64/vendor.qti.hardware.improvetouch.touchcompanion@1.0-service.so
+vendor/lib64/vendor.qti.hardware.improvetouch.touchcompanion@1.0_vendor.so
+
 # TUI
 lib64/vendor.qti.hardware.tui_comm@1.0.so
 lib/vendor.qti.hardware.tui_comm@1.0.so
