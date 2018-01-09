@@ -829,6 +829,11 @@ vendor/lib/libOmxQcelp13Dec.so
 vendor/lib/libvpphvx.so
 vendor/lib/libvqzip.so
 
+# Media DRM
+vendor/lib/mediadrm/libwvdrmengine.so
+vendor/lib/mediadrm/libdrmclearkeyplugin.so
+vendor/lib64/mediadrm/libdrmclearkeyplugin.so
+
 # Network
 vendor/lib64/libcsm_data.so
 vendor/lib/libcsm_data.so
