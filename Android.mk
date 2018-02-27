@@ -25,7 +25,7 @@ ifeq ($(TARGET_DEVICE),sagit)
 include $(call all-makefiles-under,$(LOCAL_PATH))
 
 # GPS symlinks
-$(shell ln -s /system/vendor/etc/gps.conf $(TARGET_OUT_ETC)/gps.conf)
+$(shell ln -s /vendor/etc/gps.conf $(TARGET_OUT_ETC)/gps.conf)
 
 IMS_LIBS := libimscamera_jni.so libimsmedia_jni.so
 IMS_SYMLINKS := $(addprefix $(TARGET_OUT_VENDOR_APPS)/ims/lib/arm64/,$(notdir $(IMS_LIBS)))
@@ -33,11 +33,11 @@ $(IMS_SYMLINKS): $(LOCAL_INSTALLED_MODULE)
 	@echo "IMS lib link: $@"
 	@mkdir -p $(dir $@)
 	@rm -rf $@
-	$(hide) ln -sf /system/vendor/lib64/$(notdir $@) $@
+	$(hide) ln -sf /vendor/lib64/$(notdir $@) $@
 
 ALL_DEFAULT_INSTALLED_MODULES += $(IMS_SYMLINKS)
 
-RFS_MSM_ADSP_SYMLINKS := $(TARGET_OUT)/vendor/rfs/msm/adsp/
+RFS_MSM_ADSP_SYMLINKS := $(TARGET_OUT_VENDOR)/rfs/msm/adsp/
 $(RFS_MSM_ADSP_SYMLINKS): $(LOCAL_INSTALLED_MODULE)
 	@echo "Creating RFS MSM ADSP folder structure: $@"
 	@rm -rf $@/*
@@ -49,7 +49,7 @@ $(RFS_MSM_ADSP_SYMLINKS): $(LOCAL_INSTALLED_MODULE)
 	$(hide) ln -sf /firmware $@/readonly/firmware
 	$(hide) ln -sf /vendor/firmware $@/readonly/vendor
 
-RFS_MSM_MPSS_SYMLINKS := $(TARGET_OUT)/vendor/rfs/msm/mpss/
+RFS_MSM_MPSS_SYMLINKS := $(TARGET_OUT_VENDOR)/rfs/msm/mpss/
 $(RFS_MSM_MPSS_SYMLINKS): $(LOCAL_INSTALLED_MODULE)
 	@echo "Creating RFS MSM MPSS folder structure: $@"
 	@rm -rf $@/*
