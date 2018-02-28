@@ -248,6 +248,9 @@ include device/qcom/sepolicy/sepolicy.mk
 # Sensors
 USE_SENSOR_MULTI_HAL := true
 
+# SHIMS
+TARGET_LD_SHIM_LIBS := /vendor/lib/libMiCameraHal.so|/vendor/lib/libshim_MiCamera.so
+
 # Vendor init
 TARGET_INIT_VENDOR_LIB := libinit_sagit
 TARGET_RECOVERY_DEVICE_MODULES := libinit_sagit
