@@ -73,7 +73,6 @@ LOCAL_HEADER_LIBRARIES := \
     libloc_pla_headers \
     liblocation_api_headers
 
-
 LOCAL_SHARED_LIBRARIES := \
     liblog \
     libcutils \
