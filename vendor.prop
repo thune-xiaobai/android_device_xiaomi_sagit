@@ -347,5 +347,3 @@ persist.sys.handy_mode_cct=120
 audio.offload.min.duration.secs=15
 persist.radio.report_codec=1
 persist.radio.redir_party_num=1
-
-ro.sys.sdcardfs=0
