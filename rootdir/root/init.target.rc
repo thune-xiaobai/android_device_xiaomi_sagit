@@ -191,6 +191,7 @@ on boot
 #Load WLAN driver
    insmod /vendor/lib/modules/wlan.ko
    setprop wlan.driver.status "ok"
+   chown wifi wifi /sys/module/wlan/parameters/fwpath
 
 #Peripheral manager
 service per_mgr /vendor/bin/pm-service
