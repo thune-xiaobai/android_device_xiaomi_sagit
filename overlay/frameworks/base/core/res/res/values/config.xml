@@ -400,6 +400,10 @@
          provisioning, availability etc -->
     <bool name="config_carrier_volte_available">true</bool>
 
+
+    <!-- Flag specifying whether VoLTE TTY is supported -->
+    <bool name="config_carrier_volte_tty_supported">false</bool>
+
     <!-- Flag specifying whether WFC over IMS is available on device -->
     <bool name="config_device_wfc_ims_available">true</bool>
 
