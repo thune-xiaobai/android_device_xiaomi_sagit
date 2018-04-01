@@ -147,6 +147,7 @@ dalvik.vm.heaptargetutilization=0.75
 
 # NFC
 persist.nfc.smartcard.config=SIM1,eSE1
+ro.hardware.nfc_nci=nqx.default
 ro.nfc.port=I2C
 ro.se.type=eSE,HCE,UICC
 
