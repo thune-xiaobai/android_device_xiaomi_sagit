@@ -545,6 +545,12 @@ service qvrd /system/bin/qvrservice
     socket qvrservice stream 0666 system system
     capabilities SYS_NICE
 
+service readmac /system/vendor/bin/readmac
+    class main
+    user root
+    group oem_2950 bluetooth
+    oneshot
+
 service nv_mac /vendor/bin/nv_mac
     class main
     user root
