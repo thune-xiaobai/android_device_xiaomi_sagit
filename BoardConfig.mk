@@ -207,9 +207,6 @@ TARGET_PLATFORM_DEVICE_BASE := /devices/soc/
 BOARD_HARDWARE_CLASS += \
     $(DEVICE_PATH)/lineagehw
 
-# Lights
-TARGET_PROVIDES_LIBLIGHT := true
-
 # Keymaster
 TARGET_PROVIDES_KEYMASTER := true
 
