@@ -690,7 +690,7 @@ service ipacm /vendor/bin/ipacm
     class main
     user radio
     group radio inet
-    disabled
+    writepid /dev/cpuset/system-background/tasks
 
 service qti /vendor/bin/qti
     class main
